@@ -1,40 +1,47 @@
 require("dotenv").config();
-
-
-const constants = require("./app/common/constants");
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const path = require("path");
+
+const Routes = require("./app/routes");
+const constants = require("./app/common/constants");
+
 // express app
 const app = express();
 
 // middleware
 app.use(express.json());
-
-app.use("/public", express.static(path.join(__dirname, "public")));
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
 
+app.use("/public", express.static(path.join(__dirname, "public")));
+
 app.use(cors());
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  next();
+});
+
 app.get("/", (req, res) => {
-  res.json({ message: "Index Page for HoneyCombDeals Backend Application." });
+  res.json({ message: "Index Page for Media Hub Backend Application." });
 });
 
 // routes
-require("./app/routes/admin.routes")(app);
-require("./app/routes/auth.routes")(app);
+ Routes.SetupRoutes(app);
+ 
 
 // connect to db
 mongoose
-  .connect(process.env.MONGO_URI,{
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
   })
   .then(() => {
     // listen for requests
